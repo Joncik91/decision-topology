@@ -33,7 +33,14 @@ Or manually copy the `SKILL.md`, `scripts/`, and `references/` folders into your
 
 ## Configuration
 
-Trees are stored in `{baseDir}/trees/` by default. Override with the `TOPOLOGY_TREES_DIR` environment variable to store trees elsewhere (e.g. in a memory directory for semantic search indexing).
+**Storage:** Trees are stored in `{baseDir}/trees/` by default. Override with the `TOPOLOGY_TREES_DIR` environment variable to store trees elsewhere (e.g. in a memory directory for semantic search indexing).
+
+**Always-on mode:** The skill ships with `always: true` in its metadata, meaning it runs in the background during every conversation. If you prefer on-demand tracking only, edit the metadata line in `SKILL.md`:
+
+```yaml
+# Change always to false — the skill will only activate when explicitly invoked
+metadata: {"openclaw":{"always":false,"emoji":"🌳","requires":{"bins":["node"]}}}
+```
 
 ## Usage
 
