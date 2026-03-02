@@ -1,10 +1,10 @@
 # Decision Topology
 
-An OpenClaw skill that unobtrusively maps the topology of conversations where ideas evolve, branch, get rejected, pivot, or combine. Like git for thinking — runs in the background, viewable on request. All data stays local.
+An OpenClaw skill that records the structure of conversations where ideas evolve, branch, get rejected, pivot, or combine. Saves each structural shift as a node in a local JSON tree. Like git for thinking — the structure is always there when you want to inspect it. Zero network access, zero external dependencies.
 
 ## What It Does
 
-During conversations, the agent tracks the structural shape of how ideas evolve in the background:
+During conversations, the agent records how ideas evolve as a tree structure:
 
 - **Proposals** — distinct ideas or directions suggested
 - **Pivots** — new directions emerging from rejections
@@ -15,7 +15,7 @@ The result is a persistent tree structure that captures *why* a conversation evo
 
 ## Features
 
-- **Unobtrusive operation** — runs in the background, viewable on request
+- **Low-noise operation** — active during every conversation by default, viewable on request
 - **Auto-association** — checks existing trees before creating new ones
 - **Concept indexing** — cross-tree linking via keyword concepts
 - **ASCII rendering** — visual tree display in terminal
@@ -35,10 +35,10 @@ Or manually copy the `SKILL.md`, `scripts/`, and `references/` folders into your
 
 **Storage:** Trees are stored in `{baseDir}/trees/` by default. Override with the `TOPOLOGY_TREES_DIR` environment variable to store trees elsewhere (e.g. in a memory directory for semantic search indexing).
 
-**Always-on mode:** The skill ships with `always: true` in its metadata, meaning it runs in the background during every conversation. If you prefer on-demand tracking only, edit the metadata line in `SKILL.md`:
+**Always-on mode:** The skill ships with `always: true` in its metadata, meaning it is active during every conversation by default. If you prefer on-demand recording only, edit the metadata line in `SKILL.md`:
 
 ```yaml
-# Change always to false — the skill will only activate when explicitly invoked
+# Change always to false — the skill will only record when explicitly invoked
 metadata: {"openclaw":{"always":false,"emoji":"🌳","requires":{"bins":["node"]}}}
 ```
 

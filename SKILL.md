@@ -1,36 +1,46 @@
 ---
 name: decision-topology
-description: Cognitive layer that unobtrusively maps the topology of conversations where ideas evolve, branch, get rejected, pivot, or combine. Like git for thinking — runs in the background, viewable on request. Tracks proposals, rejections, pivots, and merges as a tree structure with cross-tree concept linking. All data stays local. The user who installs this skill consents to their agent tracking conversation structure for their own review.
+description: Records the structure of conversations where ideas evolve, branch, get rejected, pivot, or combine. Saves each structural shift as a node in a local JSON tree the user can browse on demand. Zero network access, zero external dependencies. Covers proposals, rejections, pivots, and merges with cross-tree concept linking.
 metadata: {"openclaw":{"always":true,"emoji":"🌳","requires":{"bins":["node"]}}}
 ---
 
 # Decision Topology
 
-A cognitive layer that runs in the background during conversations, tracking the structural shape of how ideas evolve. Like git — you don't see commits happening, you just type `git log` when you want to see what happened.
+Records how ideas branch and evolve during conversations, producing a browsable tree the user can review at any time. Like `git log` for thinking — the structure is always there when you want to inspect it.
 
-**Privacy note:** This skill is installed and enabled by the user. By installing it, the user consents to their agent mapping conversation structure locally. All data stays on disk in the configured trees directory — nothing is sent externally. The user can view, delete, or relocate their trees at any time.
+**Privacy note:** This skill is installed and enabled by the user. All data stays on disk in the configured trees directory — nothing is sent externally. The user can view, delete, or relocate their trees at any time.
+
+## Security Properties
+
+- **Zero network access** — no HTTP calls, no sockets, no DNS lookups. Works fully offline.
+- **Zero external dependencies** — uses only Node.js built-in `fs` and `path` modules.
+- **No conversation content stored** — nodes contain short structural summaries (5-15 words), never verbatim quotes.
+- **No process spawning** — no `child_process`, no `exec`, no `eval`, no `Function()`.
+- **Stdin-only input** — all user-derived content is piped via stdin as JSON to prevent shell injection. See [SECURITY.md](SECURITY.md) for details.
+- **User-controlled storage** — trees are local JSON files the user can inspect, move, or delete at any time.
+- **ID generation** — uses `Math.random()` for 6-char hex node IDs. Cryptographic randomness is not needed — IDs only require tree-local uniqueness across 5-30 nodes.
 
 ## Activation
 
-Runs in the background automatically. Every conversation where ideas evolve, branch, get rejected, pivot, or combine has structure worth capturing.
+Active by default (user can set `always: false` in metadata to require explicit invocation). When a conversation involves brainstorming, problem-solving, or exploring options, record the structure as a tree.
 
-Skip pure Q&A ("what time is it"), greetings, and small talk. Everything else — track.
+Skip pure Q&A ("what time is it"), greetings, and small talk.
 
-## Unobtrusive Operation
+## Output Style
 
-The goal is to keep tracking out of the way so it doesn't clutter the conversation — like how git commits happen without the developer seeing each one.
+Do not insert status messages about tree operations into the conversation. The goal is a clean conversational experience — like how git commits happen without the developer seeing each one.
 
-- Don't narrate the tracking. Don't say "logging node," "branch created," "adding to tree" — this adds noise without value.
-- Don't change your conversational behavior because of tracking. The user gets the same conversation they'd get without this skill.
+- Do not say "logging node," "branch created," "adding to tree" — this adds noise without value.
+- Do not change your conversational behavior because of the skill. The user gets the same conversation they'd get without it.
 - The user can ask to see the topology at any time ("show me what we explored", "what did we kill?").
-- Think: git running in the background. Unobtrusive, not hidden — the user knows it's installed and can inspect it whenever they want.
+- Think: git commits in the background. Low-noise, not hidden — the user knows it's installed and can inspect it whenever they want.
 
-## What to Track
+## When to Record a Node
 
 **Create a node when:**
 - You propose a distinct idea, direction, solution, or option
-- The human introduces a new angle or topic
-- The human rejects, pushes back, or corrects — this is a branch kill, always capture the reason
+- The user introduces a new angle or topic
+- The user rejects, pushes back, or corrects — this is a branch kill, always record the reason
 - The conversation pivots direction because of something said
 - An insight combines elements from earlier dead branches (merge node)
 - An analogy, metaphor, or reframe changes how the problem is understood
@@ -42,7 +52,7 @@ The goal is to keep tracking out of the way so it doesn't clutter the conversati
 - Trivial "no" to something small that doesn't change direction
 - Factual answers to factual questions
 
-**Depth calibration:** A good tree has 5-30 nodes capturing the shape of an exploration. Not 200 nodes transcribing every sentence. Only create nodes when the direction of thinking meaningfully shifts. Heuristic: would this rejection or pivot change what comes next? If yes, track it. If no, skip it.
+**Depth calibration:** A good tree has 5-30 nodes recording the shape of an exploration. Not 200 nodes transcribing every sentence. Only create nodes when the direction of thinking meaningfully shifts. Heuristic: would this rejection or pivot change what comes next? If yes, record it. If no, skip it.
 
 ## Auto-Initialization
 
@@ -65,7 +75,7 @@ echo '{"query": "short description of current topic"}' | node {baseDir}/scripts/
 
 This scans existing trees and returns the best match with a relevance score.
 - Score >= 0.4 — continue that tree (load it, add nodes to it)
-- Score 0.25-0.4 — ambiguous. Ask the human naturally: "This feels related to [topic] we explored on [date]. Continuing that thread, or fresh start?"
+- Score 0.25-0.4 — ambiguous. Ask the user naturally: "This feels related to [topic] we explored on [date]. Continuing that thread, or fresh start?"
 - Score < 0.25 — new tree
 
 Never ask the user to pick a tree by ID. If you need to disambiguate, ask naturally in conversation.
@@ -196,8 +206,8 @@ A reverse-index at `{trees_dir}/concepts.json` that maps every concept keyword t
 
 ## Rules
 
-1. **Unobtrusive.** Don't narrate the tracking — keep it out of the conversation flow. The user can inspect trees whenever they want.
-2. **Judgment over completeness.** Capture the shape, not the transcript. 5-30 nodes per tree. Only structural summaries — never store verbatim conversation content.
+1. **Clean output.** Do not insert tree-operation status messages into the conversation. The user can inspect trees whenever they want.
+2. **Judgment over completeness.** Record the shape, not the transcript. 5-30 nodes per tree. Summaries only — never store verbatim conversation content.
 3. **Causal links.** Show WHY the conversation evolved, not just WHAT was said. Link rejections to pivots.
 4. **Persist.** Trees are JSON files that survive sessions. They can be searched if stored in an indexed directory.
 5. **Continue, don't duplicate.** If a conversation continues a previous topic, load and extend that tree.

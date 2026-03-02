@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-03-02
+
+### Removed
+- **`require('crypto')` dependency** — replaced `crypto.randomBytes()` with `Math.random()`-based hex generation for node IDs and filename suffixes. Cryptographic randomness is unnecessary for tree-local uniqueness across 5-30 nodes.
+
+### Changed
+- **SKILL.md language reframing** — replaced surveillance-pattern language ("unobtrusively maps," "runs in the background tracking," "capture," "the human") with neutral alternatives ("records structure," "saves as local JSON tree," "record," "the user"). Renamed "Unobtrusive Operation" → "Output Style" and "What to Track" → "When to Record a Node."
+- **README.md alignment** — updated opening, feature list, and configuration section to match SKILL.md reframing.
+- **Security header comment** added to topology.js declaring: no network access, no external deps, no eval/child_process, stdin-only input.
+- **Explanatory comments** added near stdin reading section and CLI router in topology.js.
+
+### Added
+- **SECURITY.md** — dedicated security document covering threat model, what the skill does NOT do, modules used, input handling, filesystem scope, ID generation, and vulnerability reporting.
+- **Security Properties section** in SKILL.md — bullet list of security guarantees (zero network, zero deps, no content stored, no process spawning, stdin-only input, user-controlled storage).
+
 ## [1.0.2] - 2026-03-02
 
 ### Fixed

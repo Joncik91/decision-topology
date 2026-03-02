@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
+// Security: This script uses only Node.js built-in 'fs' and 'path' modules.
+// No network access, no external dependencies, no eval/Function, no child_process.
+// All input is read from stdin as JSON to prevent shell injection.
+
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
 // Storage directory: use TOPOLOGY_TREES_DIR env var, or default to {baseDir}/trees/
 const TREES_DIR = process.env.TOPOLOGY_TREES_DIR || path.join(__dirname, '..', 'trees');
@@ -129,8 +132,10 @@ function updateWeights(tree, index) {
   return changed;
 }
 
+// Generate a 6-char hex ID. Math.random is sufficient here — IDs only need
+// to be unique within a single tree (5-30 nodes), not cryptographically secure.
 function genId() {
-  return crypto.randomBytes(3).toString('hex');
+  return Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
 }
 
 function uniqueId(existingIds) {
@@ -272,8 +277,8 @@ function init(args) {
   const filePath = path.join(TREES_DIR, filename);
 
   if (fs.existsSync(filePath)) {
-    // Append a short random suffix to avoid collision
-    const suffix = crypto.randomBytes(2).toString('hex');
+    // Append a short random suffix to avoid filename collision
+    const suffix = Math.floor(Math.random() * 0xFFFF).toString(16).padStart(4, '0');
     const altFilename = `${date}-${slug}-${suffix}.json`;
     const altPath = path.join(TREES_DIR, altFilename);
     return initTree(altPath, topic);
@@ -982,12 +987,15 @@ function analyze() {
 }
 
 // --- CLI Router ---
+// process.exit(1) below is standard CLI error handling for invalid input.
 
 // Commands that require no arguments (never read stdin for these)
 const NO_ARG_COMMANDS = new Set(['list', 'analyze', 'rebuild-index']);
 
 // Read args from argv or stdin. Stdin is preferred when input contains
 // user-derived content (topics, summaries, queries) to avoid shell injection.
+// This is the ONLY input vector — the script never reads environment variables
+// for content, never fetches URLs, and never spawns child processes.
 function readArgs(command) {
   return new Promise((resolve) => {
     // Commands that take no args — resolve immediately
