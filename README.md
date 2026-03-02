@@ -1,10 +1,10 @@
 # Decision Topology
 
-An OpenClaw skill that silently maps the topology of every conversation where ideas evolve, branch, get rejected, pivot, or combine. Like git for thinking — invisible until you ask to see it.
+An OpenClaw skill that unobtrusively maps the topology of conversations where ideas evolve, branch, get rejected, pivot, or combine. Like git for thinking — runs in the background, viewable on request. All data stays local.
 
 ## What It Does
 
-During conversations, the agent silently tracks the structural shape of how ideas evolve:
+During conversations, the agent tracks the structural shape of how ideas evolve in the background:
 
 - **Proposals** — distinct ideas or directions suggested
 - **Pivots** — new directions emerging from rejections
@@ -15,7 +15,7 @@ The result is a persistent tree structure that captures *why* a conversation evo
 
 ## Features
 
-- **Silent operation** — zero visibility unless the user asks to see it
+- **Unobtrusive operation** — runs in the background, viewable on request
 - **Auto-association** — checks existing trees before creating new ones
 - **Concept indexing** — cross-tree linking via keyword concepts
 - **ASCII rendering** — visual tree display in terminal
@@ -83,6 +83,10 @@ What stack to use for the web app?
 ## Schema
 
 See [references/schema.md](references/schema.md) for the full v2 tree and node schema.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## License
 
