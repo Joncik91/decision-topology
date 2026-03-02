@@ -17,6 +17,7 @@ Records how ideas branch and evolve during conversations, producing a browsable 
 - **No conversation content stored** — nodes contain short structural summaries (5-15 words), never verbatim quotes.
 - **No process spawning** — no `child_process`, no `exec`, no `eval`, no `Function()`.
 - **Stdin-only input** — all user-derived content is piped via stdin as JSON to prevent shell injection. See [SECURITY.md](SECURITY.md) for details.
+- **Path containment enforced** — all file arguments are stripped to basename and resolved inside the canonical trees directory. Absolute paths and `..` traversal are rejected at runtime.
 - **User-controlled storage** — trees are local JSON files the user can inspect, move, or delete at any time.
 - **ID generation** — uses `Math.random()` for 6-char hex node IDs. Cryptographic randomness is not needed — IDs only require tree-local uniqueness across 5-30 nodes.
 
@@ -85,6 +86,8 @@ Never ask the user to pick a tree by ID. If you need to disambiguate, ask natura
 **Script:** `{baseDir}/scripts/topology.js`
 
 **Storage:** Trees are stored in `{baseDir}/trees/` by default. Override with the `TOPOLOGY_TREES_DIR` environment variable if you want trees stored elsewhere (e.g. in a memory directory for semantic search indexing).
+
+**Path containment:** All `file` arguments are resolved to basenames inside the trees directory. Absolute paths and `..` traversal are rejected — the script cannot read or write files outside the configured trees directory.
 
 **Invocation:** Always pipe JSON args via stdin to prevent shell injection from user-derived content:
 ```bash

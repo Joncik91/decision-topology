@@ -9,11 +9,25 @@ const path = require('path');
 
 // Storage directory: use TOPOLOGY_TREES_DIR env var, or default to {baseDir}/trees/
 const TREES_DIR = process.env.TOPOLOGY_TREES_DIR || path.join(__dirname, '..', 'trees');
-const CONCEPT_INDEX_PATH = path.join(TREES_DIR, 'concepts.json');
 
 // Ensure storage directory exists
 if (!fs.existsSync(TREES_DIR)) {
   fs.mkdirSync(TREES_DIR, { recursive: true });
+}
+
+// Canonicalize TREES_DIR once at startup for path containment checks.
+const TREES_DIR_REAL = fs.realpathSync(TREES_DIR);
+const CONCEPT_INDEX_PATH = path.join(TREES_DIR_REAL, 'concepts.json');
+
+// Resolve a user-supplied file path and enforce that it stays inside TREES_DIR.
+// Rejects absolute paths, ".." traversal, and symlinks that escape the directory.
+function resolveSafePath(file) {
+  const resolved = path.resolve(TREES_DIR_REAL, path.basename(file));
+  if (!resolved.startsWith(TREES_DIR_REAL + path.sep) && resolved !== TREES_DIR_REAL) {
+    console.error(`Error: Path escapes trees directory: ${file}`);
+    process.exit(1);
+  }
+  return resolved;
 }
 
 // --- Concept Index ---
@@ -147,7 +161,8 @@ function uniqueId(existingIds) {
 }
 
 function loadTree(file) {
-  const filePath = file.startsWith('/') ? file : path.join(TREES_DIR, file);
+  // Strip to basename and resolve inside TREES_DIR to prevent path traversal.
+  const filePath = resolveSafePath(file);
   if (!fs.existsSync(filePath)) {
     console.error(`Error: Tree file not found: ${filePath}`);
     process.exit(1);
@@ -249,12 +264,12 @@ function slugify(text) {
 }
 
 function getAllTrees() {
-  return fs.readdirSync(TREES_DIR)
+  return fs.readdirSync(TREES_DIR_REAL)
     .filter(f => f.endsWith('.json') && f !== 'concepts.json')
     .map(f => {
       try {
-        const tree = JSON.parse(fs.readFileSync(path.join(TREES_DIR, f), 'utf8'));
-        return { file: f, filePath: path.join(TREES_DIR, f), tree };
+        const tree = JSON.parse(fs.readFileSync(path.join(TREES_DIR_REAL, f), 'utf8'));
+        return { file: f, filePath: path.join(TREES_DIR_REAL, f), tree };
       } catch (e) {
         return null;
       }
@@ -274,13 +289,13 @@ function init(args) {
   const date = new Date().toISOString().split('T')[0];
   const slug = slugify(topic);
   const filename = `${date}-${slug}.json`;
-  const filePath = path.join(TREES_DIR, filename);
+  const filePath = path.join(TREES_DIR_REAL, filename);
 
   if (fs.existsSync(filePath)) {
     // Append a short random suffix to avoid filename collision
     const suffix = Math.floor(Math.random() * 0xFFFF).toString(16).padStart(4, '0');
     const altFilename = `${date}-${slug}-${suffix}.json`;
-    const altPath = path.join(TREES_DIR, altFilename);
+    const altPath = path.join(TREES_DIR_REAL, altFilename);
     return initTree(altPath, topic);
   }
 
@@ -619,7 +634,7 @@ function list() {
   // Sort by updated date, most recent first
   allTrees.sort((a, b) => (b.tree.updated || '').localeCompare(a.tree.updated || ''));
 
-  const output = [`${allTrees.length} decision trees found in ${TREES_DIR}:`, ''];
+  const output = [`${allTrees.length} decision trees found in ${TREES_DIR_REAL}:`, ''];
 
   for (const { file, filePath, tree } of allTrees) {
     const nodeCount = Object.keys(tree.nodes).length;

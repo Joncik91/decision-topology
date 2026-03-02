@@ -40,6 +40,14 @@ The script reads and writes files in exactly one directory: the trees directory,
 1. The `TOPOLOGY_TREES_DIR` environment variable (if set), or
 2. `{script_directory}/../trees/` (default)
 
+**Path containment is enforced at runtime.** At startup, the trees directory is canonicalized via `fs.realpathSync()`. Every user-supplied `file` argument is stripped to its basename with `path.basename()` and then resolved inside the canonical trees directory. This means:
+
+- Absolute paths like `/etc/passwd` are rejected (basename extraction produces `passwd`, which won't exist in trees dir).
+- Relative traversal like `../../etc/shadow` is rejected (basename extraction produces `shadow`).
+- Symlinks are resolved by `realpathSync` — a symlink inside the trees directory that points outside it would need to already exist on disk, which the script never creates.
+
+The `resolveSafePath()` function additionally verifies the resolved path starts with the canonical trees directory prefix before any read or write occurs. If the check fails, the script exits with an error.
+
 No files outside this directory are read, written, or deleted.
 
 ## ID Generation

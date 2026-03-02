@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-03-02
+
+### Fixed
+- **Path traversal vulnerability:** `loadTree()` accepted absolute paths and `..` traversal, allowing reads/writes outside the configured trees directory. Now all file arguments are stripped to `path.basename()` and resolved inside the canonicalized `TREES_DIR`. `resolveSafePath()` rejects any resolved path that escapes the trees directory.
+
+### Changed
+- Trees directory is canonicalized at startup via `fs.realpathSync()` (`TREES_DIR_REAL`). All internal references use the canonical path.
+- `getAllTrees()`, `init()`, and `list()` updated to use `TREES_DIR_REAL`.
+- SECURITY.md updated with path containment implementation details.
+- SKILL.md updated with "Path containment" note in Setup section and Security Properties.
+
 ## [1.0.4] - 2026-03-02
 
 ### Removed
