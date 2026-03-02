@@ -14,7 +14,7 @@ Records how ideas branch and evolve during conversations, producing a browsable 
 
 - **Zero network access** — no HTTP calls, no sockets, no DNS lookups. Works fully offline.
 - **Zero external dependencies** — uses only Node.js built-in `fs` and `path` modules.
-- **No conversation content stored** — nodes contain short structural summaries (5-15 words), never verbatim quotes.
+- **No conversation content stored** — the script enforces length limits on all persisted text fields (summary: 200 chars, reasoning: 300 chars, topic: 120 chars, concept: 50 chars). Text exceeding limits is truncated. This is a code-level guardrail, not just a policy.
 - **No process spawning** — no `child_process`, no `exec`, no `eval`, no `Function()`.
 - **Stdin-only input** — all user-derived content is piped via stdin as JSON to prevent shell injection. See [SECURITY.md](SECURITY.md) for details.
 - **Path containment enforced** — all file arguments are stripped to basename and resolved inside the canonical trees directory. Absolute paths and `..` traversal are rejected at runtime.

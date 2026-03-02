@@ -13,7 +13,7 @@ The primary threat surface is the host filesystem: the script reads and writes J
 - **No `eval` or dynamic code execution** — no `eval()`, no `new Function()`, no `vm.runInContext()`.
 - **No child process spawning** — no `child_process`, no `exec`, no `spawn`, no `execFile`.
 - **No telemetry or analytics** — nothing is collected, reported, or phoned home.
-- **No conversation content stored** — nodes contain short structural summaries (5-15 words each), never verbatim conversation quotes.
+- **No conversation content stored** — all persisted text fields are truncated at the code level (see "Content Guards" below). Nodes contain short structural summaries, never verbatim conversation quotes.
 - **No data exfiltration path** — even if the filesystem were compromised, tree files contain only topic labels and structural metadata, not conversation content.
 
 ## Modules Used
@@ -49,6 +49,22 @@ The script reads and writes files in exactly one directory: the trees directory,
 The `resolveSafePath()` function additionally verifies the resolved path starts with the canonical trees directory prefix before any read or write occurs. If the check fails, the script exits with an error.
 
 No files outside this directory are read, written, or deleted.
+
+## Content Guards
+
+All text fields written to tree JSON and companion `.md` files are programmatically truncated before saving. This is enforced in code, not just in documentation policy.
+
+| Field | Max length | Applied in |
+|-------|-----------|------------|
+| `topic` | 120 chars | `init()` |
+| `summary` | 200 chars | `addNode()`, `merge()`, `fork()`, `initTree()` |
+| `reasoning` | 300 chars | `addNode()`, `merge()`, `fork()` |
+| `killed_by` | 200 chars | `killBranch()` |
+| `concepts[]` | 50 chars each | `addNode()`, `merge()` |
+
+Text exceeding these limits is silently truncated with a `...` suffix. The `truncate()` function handles this before any data reaches `saveTree()` or `writeMdCompanion()`.
+
+These limits are generous enough for legitimate structural summaries (~30 words) but prevent verbatim conversation dumps. Even if the calling agent passes full conversation text, only the first portion would be stored — and that portion is too short to constitute useful conversation content.
 
 ## ID Generation
 

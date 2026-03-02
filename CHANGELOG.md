@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-03-02
+
+### Added
+- **Content guards (code-level enforcement):** All persisted text fields are now truncated before saving — summary (200 chars), reasoning (300 chars), topic (120 chars), kill reason (200 chars), concept keywords (50 chars each). This replaces the documentation-only policy with programmatic enforcement.
+- `truncate()` utility function with configurable max lengths and `...` suffix on overflow.
+
+### Changed
+- SKILL.md and SECURITY.md updated to document content guards as code-level enforcement, not just policy.
+- SECURITY.md now includes a "Content Guards" section with per-field limit table.
+
 ## [1.0.5] - 2026-03-02
 
 ### Fixed
