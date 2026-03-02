@@ -60,7 +60,7 @@ When a conversation starts and ideas begin branching, check if this connects to 
 
 **How to check:** Run the associate command with the core topic:
 ```bash
-node {baseDir}/scripts/topology.js associate '{"query": "short description of current topic"}'
+echo '{"query": "short description of current topic"}' | node {baseDir}/scripts/topology.js associate
 ```
 
 This scans existing trees and returns the best match with a relevance score.
@@ -76,36 +76,39 @@ Never ask the user to pick a tree by ID. If you need to disambiguate, ask natura
 
 **Storage:** Trees are stored in `{baseDir}/trees/` by default. Override with the `TOPOLOGY_TREES_DIR` environment variable if you want trees stored elsewhere (e.g. in a memory directory for semantic search indexing).
 
-**Invocation:** `node {baseDir}/scripts/topology.js <command> [args as JSON]`
+**Invocation:** Always pipe JSON args via stdin to prevent shell injection from user-derived content:
+```bash
+echo '<JSON args>' | node {baseDir}/scripts/topology.js <command>
+```
 
 ## Core Operations
 
 ### Initialize a tree
 ```bash
-node {baseDir}/scripts/topology.js init '{"topic": "short topic description"}'
+echo '{"topic": "short topic description"}' | node {baseDir}/scripts/topology.js init
 ```
 Returns the file path and root node ID. Remember both for the session.
 
 ### Add a node
 ```bash
-node {baseDir}/scripts/topology.js add-node '{"file": "<path>", "parent_id": "<id>", "type": "proposal", "summary": "one-line description", "reasoning": "why", "concepts": ["keyword1", "keyword2"]}'
+echo '{"file": "<path>", "parent_id": "<id>", "type": "proposal", "summary": "one-line description", "reasoning": "why", "concepts": ["keyword1", "keyword2"]}' | node {baseDir}/scripts/topology.js add-node
 ```
 Types: `proposal`, `pivot`, `merge`. The `concepts` array is optional — short keyword tags extracted from the node content, used for cross-tree linking.
 
 ### Kill a branch
 ```bash
-node {baseDir}/scripts/topology.js kill-branch '{"file": "<path>", "node_id": "<id>", "reason": "why it was rejected"}'
+echo '{"file": "<path>", "node_id": "<id>", "reason": "why it was rejected"}' | node {baseDir}/scripts/topology.js kill-branch
 ```
 Then add the new direction as a child (pivot node linked to what was killed).
 
 ### Merge branches
 ```bash
-node {baseDir}/scripts/topology.js merge '{"file": "<path>", "source_ids": ["<id1>", "<id2>"], "summary": "merged insight", "reasoning": "combines X from A with Y from B"}'
+echo '{"file": "<path>", "source_ids": ["<id1>", "<id2>"], "summary": "merged insight", "reasoning": "combines X from A with Y from B"}' | node {baseDir}/scripts/topology.js merge
 ```
 
 ### Fork from any node
 ```bash
-node {baseDir}/scripts/topology.js fork '{"file": "<path>", "node_id": "<id>", "summary": "re-exploring from this point", "reasoning": "reason for revisiting"}'
+echo '{"file": "<path>", "node_id": "<id>", "summary": "re-exploring from this point", "reasoning": "reason for revisiting"}' | node {baseDir}/scripts/topology.js fork
 ```
 
 ## Node Types
@@ -134,7 +137,7 @@ You understand the intent and run the appropriate commands. Present results conv
 
 ### Rendering
 ```bash
-node {baseDir}/scripts/topology.js render '{"file": "<path>"}'
+echo '{"file": "<path>"}' | node {baseDir}/scripts/topology.js render
 ```
 After the tree, append a one-line summary: `{N} branches explored, {M} killed, {K} active, depth {D}`
 
@@ -145,12 +148,12 @@ node {baseDir}/scripts/topology.js list
 
 ### Statistics
 ```bash
-node {baseDir}/scripts/topology.js stats '{"file": "<path>"}'
+echo '{"file": "<path>"}' | node {baseDir}/scripts/topology.js stats
 ```
 
 ### Export as Mermaid
 ```bash
-node {baseDir}/scripts/topology.js export '{"file": "<path>"}'
+echo '{"file": "<path>"}' | node {baseDir}/scripts/topology.js export
 ```
 
 ### Revisiting a dead branch
@@ -168,9 +171,9 @@ Rebuilds the concept index, scans all trees, finds concepts appearing across mul
 
 ### Query the concept index
 ```bash
-node {baseDir}/scripts/topology.js concept '{"name": "trust"}'
-node {baseDir}/scripts/topology.js concept '{"list": true}'
-node {baseDir}/scripts/topology.js concept '{"orphans": true}'
+echo '{"name": "trust"}' | node {baseDir}/scripts/topology.js concept
+echo '{"list": true}' | node {baseDir}/scripts/topology.js concept
+echo '{"orphans": true}' | node {baseDir}/scripts/topology.js concept
 ```
 - `name` — reverse-lookup: shows every node across every tree that references a concept
 - `list` — all concepts sorted by cross-tree spread, `*` marks concepts spanning multiple trees

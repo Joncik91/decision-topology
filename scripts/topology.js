@@ -983,17 +983,58 @@ function analyze() {
 
 // --- CLI Router ---
 
-const command = process.argv[2];
-let args = {};
+// Commands that require no arguments (never read stdin for these)
+const NO_ARG_COMMANDS = new Set(['list', 'analyze', 'rebuild-index']);
 
-if (process.argv[3]) {
-  try {
-    args = JSON.parse(process.argv[3]);
-  } catch (e) {
-    console.error(`Error: Invalid JSON argument: ${e.message}`);
-    process.exit(1);
-  }
+// Read args from argv or stdin. Stdin is preferred when input contains
+// user-derived content (topics, summaries, queries) to avoid shell injection.
+function readArgs(command) {
+  return new Promise((resolve) => {
+    // Commands that take no args — resolve immediately
+    if (NO_ARG_COMMANDS.has(command)) {
+      resolve({});
+      return;
+    }
+
+    // If args passed as argv[3], use those
+    if (process.argv[3]) {
+      try {
+        resolve(JSON.parse(process.argv[3]));
+      } catch (e) {
+        console.error(`Error: Invalid JSON argument: ${e.message}`);
+        process.exit(1);
+      }
+      return;
+    }
+
+    // Check if stdin is a TTY (interactive terminal, no piped data)
+    if (process.stdin.isTTY) {
+      resolve({});
+      return;
+    }
+
+    // Read piped stdin
+    let data = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk) => { data += chunk; });
+    process.stdin.on('end', () => {
+      if (!data.trim()) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(data));
+      } catch (e) {
+        console.error(`Error: Invalid JSON on stdin: ${e.message}`);
+        process.exit(1);
+      }
+    });
+  });
 }
+
+const command = process.argv[2];
+
+readArgs(command).then((args) => {
 
 switch (command) {
   case 'init': init(args); break;
@@ -1023,6 +1064,9 @@ switch (command) {
   }
   default:
     console.error('Usage: topology.js <command> [args as JSON]');
+    console.error('       echo \'{"key":"value"}\' | topology.js <command>');
+    console.error('');
+    console.error('Args can be passed as argv[3] or piped via stdin (preferred for user input).');
     console.error('');
     console.error('Commands:');
     console.error('  init            Create a new decision tree');
@@ -1040,3 +1084,5 @@ switch (command) {
     console.error('  rebuild-index   Rebuild concept index from all trees');
     process.exit(1);
 }
+
+}); // end readArgs

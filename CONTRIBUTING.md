@@ -20,12 +20,12 @@ The skill is a standalone Node.js script with zero dependencies. Test it directl
 # Set a temp trees directory
 export TOPOLOGY_TREES_DIR=/tmp/test-trees
 
-# Create a tree
-node scripts/topology.js init '{"topic": "test topic"}'
+# Create a tree (args piped via stdin)
+echo '{"topic": "test topic"}' | node scripts/topology.js init
 
 # Add nodes, render, etc.
 node scripts/topology.js list
-node scripts/topology.js render '{"file": "<path from init>"}'
+echo '{"file": "<path from init>"}' | node scripts/topology.js render
 ```
 
 Clean up after testing:

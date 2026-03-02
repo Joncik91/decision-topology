@@ -47,17 +47,19 @@ The skill runs automatically — no setup needed. The user interacts naturally:
 
 ### CLI Commands
 
+Args are piped via stdin to avoid shell injection from user-derived content:
+
 ```bash
-node scripts/topology.js init '{"topic": "exploration topic"}'
-node scripts/topology.js add-node '{"file": "<path>", "parent_id": "<id>", "type": "proposal", "summary": "description"}'
-node scripts/topology.js kill-branch '{"file": "<path>", "node_id": "<id>", "reason": "why rejected"}'
-node scripts/topology.js merge '{"file": "<path>", "source_ids": ["<id1>", "<id2>"], "summary": "merged insight"}'
-node scripts/topology.js render '{"file": "<path>"}'
-node scripts/topology.js export '{"file": "<path>"}'
+echo '{"topic": "exploration topic"}' | node scripts/topology.js init
+echo '{"file": "<path>", "parent_id": "<id>", "type": "proposal", "summary": "description"}' | node scripts/topology.js add-node
+echo '{"file": "<path>", "node_id": "<id>", "reason": "why rejected"}' | node scripts/topology.js kill-branch
+echo '{"file": "<path>", "source_ids": ["<id1>", "<id2>"], "summary": "merged insight"}' | node scripts/topology.js merge
+echo '{"file": "<path>"}' | node scripts/topology.js render
+echo '{"file": "<path>"}' | node scripts/topology.js export
 node scripts/topology.js list
-node scripts/topology.js stats '{"file": "<path>"}'
+echo '{"file": "<path>"}' | node scripts/topology.js stats
 node scripts/topology.js analyze
-node scripts/topology.js concept '{"list": true}'
+echo '{"list": true}' | node scripts/topology.js concept
 ```
 
 ### Example Tree Output
