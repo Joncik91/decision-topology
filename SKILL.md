@@ -1,25 +1,29 @@
 ---
 name: decision-topology
-description: Always-active cognitive layer that silently maps the topology of every conversation where ideas evolve, branch, get rejected, pivot, or combine. Like git for thinking — invisible until you ask to see it. Tracks proposals, rejections, pivots, and merges as a tree structure with cross-tree concept linking.
-metadata: {"openclaw":{"emoji":"🌳","requires":{"bins":["node"]}}}
+description: Cognitive layer that unobtrusively maps the topology of conversations where ideas evolve, branch, get rejected, pivot, or combine. Like git for thinking — runs in the background, viewable on request. Tracks proposals, rejections, pivots, and merges as a tree structure with cross-tree concept linking. All data stays local. The user who installs this skill consents to their agent tracking conversation structure for their own review.
+metadata: {"openclaw":{"always":true,"emoji":"🌳","requires":{"bins":["node"]}}}
 ---
 
 # Decision Topology
 
-A cognitive layer that runs silently during every conversation, tracking the structural shape of how ideas evolve. Like git — you don't see commits happening, you just type `git log` when you want to see what happened.
+A cognitive layer that runs in the background during conversations, tracking the structural shape of how ideas evolve. Like git — you don't see commits happening, you just type `git log` when you want to see what happened.
+
+**Privacy note:** This skill is installed and enabled by the user. By installing it, the user consents to their agent mapping conversation structure locally. All data stays on disk in the configured trees directory — nothing is sent externally. The user can view, delete, or relocate their trees at any time.
 
 ## Activation
 
-Always running. No triggers. No keywords. Every conversation where ideas evolve, branch, get rejected, pivot, or combine has structure worth capturing. You track it silently.
+Runs in the background automatically. Every conversation where ideas evolve, branch, get rejected, pivot, or combine has structure worth capturing.
 
 Skip pure Q&A ("what time is it"), greetings, and small talk. Everything else — track.
 
-## Silent Operation
+## Unobtrusive Operation
 
-- Never announce that you are tracking. Never say "logging node," "branch created," "adding to tree." Zero visibility.
-- Never change your conversational behavior because of tracking. The human gets the same conversation they'd get without this skill.
-- The tracking is invisible until the human asks to see it.
-- Think: git running in the background. The developer doesn't see commits happening.
+The goal is to keep tracking out of the way so it doesn't clutter the conversation — like how git commits happen without the developer seeing each one.
+
+- Don't narrate the tracking. Don't say "logging node," "branch created," "adding to tree" — this adds noise without value.
+- Don't change your conversational behavior because of tracking. The user gets the same conversation they'd get without this skill.
+- The user can ask to see the topology at any time ("show me what we explored", "what did we kill?").
+- Think: git running in the background. Unobtrusive, not hidden — the user knows it's installed and can inspect it whenever they want.
 
 ## What to Track
 
@@ -189,10 +193,11 @@ A reverse-index at `{trees_dir}/concepts.json` that maps every concept keyword t
 
 ## Rules
 
-1. **Invisible.** The human never knows tracking is happening unless they ask.
-2. **Judgment over completeness.** Capture the shape, not the transcript. 5-30 nodes per tree.
+1. **Unobtrusive.** Don't narrate the tracking — keep it out of the conversation flow. The user can inspect trees whenever they want.
+2. **Judgment over completeness.** Capture the shape, not the transcript. 5-30 nodes per tree. Only structural summaries — never store verbatim conversation content.
 3. **Causal links.** Show WHY the conversation evolved, not just WHAT was said. Link rejections to pivots.
 4. **Persist.** Trees are JSON files that survive sessions. They can be searched if stored in an indexed directory.
 5. **Continue, don't duplicate.** If a conversation continues a previous topic, load and extend that tree.
 6. **Graceful failures.** Missing or corrupted tree — re-initialize. Missing node ID — say so clearly. Never crash.
 7. **Natural interface.** The user asks in plain language. You translate to the right operation. Slash commands are optional shortcuts, not the primary interface.
+8. **Local only.** All data stays on disk. No network calls, no external APIs, no telemetry. The user owns their data.
