@@ -1,6 +1,27 @@
 # Decision Topology
 
-An OpenClaw skill that records the structure of conversations where ideas evolve, branch, get rejected, pivot, or combine. Saves each structural shift as a node in a local JSON tree. Like git for thinking — the structure is always there when you want to inspect it. Zero network access, zero external dependencies.
+[![License: MIT](https://img.shields.io/badge/license-MIT-E8954A.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-built--ins%20only-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Zero deps](https://img.shields.io/badge/zero%20deps-✓-E8954A)]()
+[![Local-only](https://img.shields.io/badge/local--only-✓-E8954A)](SECURITY.md)
+[![OpenClaw skill](https://img.shields.io/badge/OpenClaw-skill-E8954A)]()
+
+**An OpenClaw skill that records the structure of conversations where ideas evolve, branch, get rejected, pivot, or combine.**
+
+Saves each structural shift as a node in a local JSON tree. Like git for thinking — the structure is always there when you want to inspect it. Zero network access, zero external dependencies.
+
+## Table of Contents
+
+- [What It Does](#what-it-does)
+- [Features](#features)
+- [Install](#install)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Requirements](#requirements)
+- [Schema](#schema)
+- [Changelog](#changelog)
+- [Security](#security)
+- [License](#license)
 
 ## What It Does
 
@@ -97,6 +118,19 @@ See [references/schema.md](references/schema.md) for the full v2 tree and node s
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
+## Security
+
+The skill is **local-only by design**: no network access, no external
+dependencies, no `eval` / dynamic code execution, no `child_process`,
+no telemetry. The full threat model — what data the skill stores,
+where, and the surfaces an attacker would need to reach to abuse it —
+is in [`SECURITY.md`](SECURITY.md).
+
+Conversation trees may carry context the user wouldn't paste into a
+public chat. Treat the trees directory (`{baseDir}/trees/` by default,
+or wherever `TOPOLOGY_TREES_DIR` points) the same way you treat any
+other notes folder containing project context.
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
